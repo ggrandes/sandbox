@@ -22,7 +22,7 @@ public class BenchReflect {
 		}
 
 		// Benchmark Normal Invocation (Object)
-		if (true) {
+		if (true) { 
 			ts = System.currentTimeMillis();
 			for (int i = 0; i < TOTAL; i++) {
 				invokedObj.doObject(dummyObj);
