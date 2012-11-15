@@ -1,5 +1,15 @@
 import java.lang.reflect.Method;
 
+/**
+ * Example of output:
+ * Loop iteration counter=5000000
+ * Normal Static time=78ms
+ * Normal Object time=78ms
+ * Reflection Static time=796ms
+ * Reflection Object time=796ms
+ * Static XX=96349939634993
+ * Object XX=96349939634993
+ */
 public class BenchReflect {
 	public static void main(String... args) throws Exception {
 		final int TOTAL = (int) 5e6;
