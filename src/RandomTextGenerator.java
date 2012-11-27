@@ -12,6 +12,7 @@ import java.util.concurrent.Executors;
  * Inspired in http://en.wikipedia.org/wiki/Character_Generator_Protocol 
  */
 public class RandomTextGenerator {
+	private static final boolean QUIET = true;
 	private static final int CHARGEN_TCP = 19;
 	private static final char[] chars = "0123456789abcdefefghijklmnopqrstuvwxyzABCDEFEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
 	private static final ExecutorService threadPool = Executors.newCachedThreadPool();
@@ -21,6 +22,8 @@ public class RandomTextGenerator {
 		System.out.println("Listen in: " + listen);
 		while (true) {
 			final Socket sock = listen.accept();
+			sock.setSendBufferSize(0xFFFF);
+			sock.setReceiveBufferSize(0xFFFF);
 			System.out.println("New connection from: " + sock);
 			threadPool.submit(new Runnable() {
 				public void run() {
@@ -39,7 +42,7 @@ public class RandomTextGenerator {
 							}
 						}
 					} catch (IOException e) {
-						System.out.println(e.toString());
+						if (!QUIET) System.out.println(e.toString());
 					}
 					try { os.close(); } catch(Exception ign) {}
 					try { sock.close(); } catch(Exception ign) {}
