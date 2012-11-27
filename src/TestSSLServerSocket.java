@@ -77,6 +77,7 @@ public class TestSSLServerSocket {
 		System.out.println("Listen: " + listen);
 		while (true) {
 			SSLSocket socket = (SSLSocket) listen.accept();
+			socket.startHandshake();
 			try {
 				System.out.println("New client: " + socket + " session: " + socket.getSession());
 				BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
