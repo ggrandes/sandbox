@@ -1,6 +1,6 @@
 # Codigo de ejemplo Java
 
-Aqui pongo codigo de ejemplo, pruebas y conceptos.
+Pruebas de concepto, sandbox y codigo variado.
 
 ---
 [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
