@@ -3,19 +3,28 @@ import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.Date;
+import java.util.Vector;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 
 import javax.xml.bind.DatatypeConverter;
 
+import sun.security.util.ObjectIdentifier;
 import sun.security.x509.AlgorithmId;
+import sun.security.x509.AuthorityKeyIdentifierExtension;
+import sun.security.x509.BasicConstraintsExtension;
 import sun.security.x509.CertificateAlgorithmId;
+import sun.security.x509.CertificateExtensions;
 import sun.security.x509.CertificateIssuerName;
 import sun.security.x509.CertificateSerialNumber;
 import sun.security.x509.CertificateSubjectName;
 import sun.security.x509.CertificateValidity;
 import sun.security.x509.CertificateVersion;
 import sun.security.x509.CertificateX509Key;
+import sun.security.x509.ExtendedKeyUsageExtension;
+import sun.security.x509.KeyIdentifier;
+import sun.security.x509.SubjectKeyIdentifierExtension;
 import sun.security.x509.X500Name;
 import sun.security.x509.X509CertImpl;
 import sun.security.x509.X509CertInfo;
@@ -39,25 +48,30 @@ public class TestX509 {
 		int sn = (int)((System.currentTimeMillis()/1000) & 0xFFFFFFFF);
 		X500Name owner = new X500Name(dn);
 
+		AlgorithmId algo = new AlgorithmId(AlgorithmId.sha1WithRSAEncryption_oid);
 		info.set(X509CertInfo.VALIDITY, interval);
 		info.set(X509CertInfo.SERIAL_NUMBER, new CertificateSerialNumber(sn));
 		info.set(X509CertInfo.SUBJECT, new CertificateSubjectName(owner));
 		info.set(X509CertInfo.ISSUER, new CertificateIssuerName(owner));
 		info.set(X509CertInfo.KEY, new CertificateX509Key(pair.getPublic()));
 		info.set(X509CertInfo.VERSION, new CertificateVersion(CertificateVersion.V3));
-		AlgorithmId algo = new AlgorithmId(AlgorithmId.sha1WithRSAEncryption_oid);
 		info.set(X509CertInfo.ALGORITHM_ID, new CertificateAlgorithmId(algo));
 
-		// Sign the cert to identify the algorithm that's used.
+		// Extensions
+		CertificateExtensions ext = new CertificateExtensions();
+		ext.set(BasicConstraintsExtension.NAME, new BasicConstraintsExtension(Boolean.TRUE, true, 0)); // Critical|isCA|pathLen
+		ext.set(SubjectKeyIdentifierExtension.NAME, new SubjectKeyIdentifierExtension(new KeyIdentifier(pair.getPublic()).getIdentifier()));
+		ext.set(AuthorityKeyIdentifierExtension.NAME, new AuthorityKeyIdentifierExtension(new KeyIdentifier(pair.getPublic()), null, null));
+		// Extended Key Usage Extension
+		Vector<ObjectIdentifier> ekue = new Vector<ObjectIdentifier>();
+		ekue.add(new ObjectIdentifier(new int[] { 1, 3, 6, 1, 5, 5, 7, 3, 1 })); // Server
+		ekue.add(new ObjectIdentifier(new int[] { 1, 3, 6, 1, 5, 5, 7, 3, 2 })); // Client
+		ext.set(ExtendedKeyUsageExtension.NAME, new ExtendedKeyUsageExtension(Boolean.FALSE, ekue));
+		info.set(X509CertInfo.EXTENSIONS, ext);
+		
+		// Sign the X.509
 		X509CertImpl cert = new X509CertImpl(info);
-		String algorithm = algo.getName();
-		cert.sign(privkey, algorithm);
-
-		// Update the algorith, and resign.
-		algo = (AlgorithmId)cert.get(X509CertImpl.SIG_ALG);
-		info.set(CertificateAlgorithmId.NAME + "." + CertificateAlgorithmId.ALGORITHM, algo);
-		cert = new X509CertImpl(info);
-		cert.sign(privkey, algorithm);
+		cert.sign(privkey, algo.getName());
 		return cert;
 	}
 
@@ -95,8 +109,10 @@ public class TestX509 {
 		KeyPair kp = kgAsym.genKeyPair();
 		X509Certificate crt = generateCertificate("CN=Test1", kp, 365);
 		System.out.println(crt);
-		writeKey(new FileOutputStream("test.key"), kp.getPrivate());
-		writeCertificate(new FileOutputStream("test.crt"), crt);
+		File keyFile = new File(System.getProperty("java.io.tmpdir"), "test.key");
+		File crtFile = new File(System.getProperty("java.io.tmpdir"), "test.crt");
+		writeKey(new FileOutputStream(keyFile), kp.getPrivate());
+		writeCertificate(new FileOutputStream(crtFile), crt);
 	}
 
 }
