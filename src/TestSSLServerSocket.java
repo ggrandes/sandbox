@@ -24,6 +24,8 @@ import javax.net.ssl.TrustManagerFactory;
  * http://stackoverflow.com/questions/5871279/java-ssl-and-cert-keystore
  * http://docs.oracle.com/javase/6/docs/technotes/guides/security/SunProviders.html
  * http://www.oracle.com/technetwork/java/javase/downloads/jce-6-download-429243.html
+ * http://danielriab.wordpress.com/2012/08/13/java-pkix-path-building-failed/
+ * http://stackoverflow.com/questions/2290570/pkix-path-building-failed-while-making-ssl-connection
  */
 public class TestSSLServerSocket {
 
