@@ -28,7 +28,7 @@ import javax.net.ssl.TrustManagerFactory;
  * http://stackoverflow.com/questions/2290570/pkix-path-building-failed-while-making-ssl-connection
  */
 public class TestSSLServerSocket {
-
+	//
 	public static SSLParameters setupSSLParams(SSLContext ctx) {
 		List<String> protos = Arrays.asList(new String[] { 
 				"TLSv1", 
@@ -47,13 +47,15 @@ public class TestSSLServerSocket {
 		sslParams.setCipherSuites(suites.toArray(new String[0]));
 		return sslParams;
 	}
-
+	//
 	public static void main(String[] args) throws Exception {
 		char[] pwd = "changeit".toCharArray();
+		//
 		// Generate RSA Key
 		KeyPairGenerator kgAsym = KeyPairGenerator.getInstance("RSA");
 		kgAsym.initialize(1024); // TODO: RSA { 1024, 1536, 2048 }
 		KeyPair kp = kgAsym.genKeyPair();
+		//
 		// Generate X.509 Certificate
 		X509Certificate crt = TestX509.generateCertificate("CN=Test1", kp, 365);
 		File crtFile = new File(System.getProperty("java.io.tmpdir"), "test.crt");
@@ -78,6 +80,7 @@ public class TestSSLServerSocket {
 		SSLServerSocket listen = (SSLServerSocket) factory.createServerSocket(1991);
 		listen.setEnabledCipherSuites(sslParams.getCipherSuites());
 		listen.setEnabledProtocols(sslParams.getProtocols());
+		//
 		// Display Settings
 		System.out.println("Protos: " + Arrays.asList(listen.getEnabledProtocols()));
 		System.out.println("Suites: " + Arrays.asList(listen.getEnabledCipherSuites()));
@@ -105,5 +108,5 @@ public class TestSSLServerSocket {
 			}
 		}
 	}
-
+	//
 }
