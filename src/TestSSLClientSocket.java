@@ -17,7 +17,7 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
 
 public class TestSSLClientSocket {
-
+	//
 	public static SSLParameters setupSSLParams(SSLContext ctx) {
 		List<String> protos = Arrays.asList(new String[] { 
 				"TLSv1", 
@@ -36,9 +36,10 @@ public class TestSSLClientSocket {
 		sslParams.setCipherSuites(suites.toArray(new String[0]));
 		return sslParams;
 	}
-
+	//
 	public static void main(String[] args) throws Exception {
 		char[] pwd = "changeit".toCharArray();
+		//
 		// Import X.509 Certificate
 		File crtFile = new File(System.getProperty("java.io.tmpdir"), "test.crt");
 		FileInputStream isCrt = new FileInputStream(crtFile);
@@ -65,6 +66,7 @@ public class TestSSLClientSocket {
 		SSLSocket sock = (SSLSocket) factory.createSocket();
 		sock.setEnabledCipherSuites(sslParams.getCipherSuites());
 		sock.setEnabledProtocols(sslParams.getProtocols());
+		//
 		// Display Settings
 		System.out.println("Protos: " + Arrays.asList(sock.getEnabledProtocols()));
 		System.out.println("Suites: " + Arrays.asList(sock.getEnabledCipherSuites()));
@@ -88,5 +90,5 @@ public class TestSSLClientSocket {
 			e.printStackTrace();
 		}
 	}
-
+	//
 }
