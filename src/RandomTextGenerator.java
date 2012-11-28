@@ -12,6 +12,7 @@ import java.util.concurrent.Executors;
  * Inspired in http://en.wikipedia.org/wiki/Character_Generator_Protocol 
  */
 public class RandomTextGenerator {
+	//
 	private static final boolean QUIET = true;
 	private static final int CHARGEN_TCP = 19;
 	private static final char[] chars = "0123456789abcdefefghijklmnopqrstuvwxyzABCDEFEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
