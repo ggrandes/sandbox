@@ -49,6 +49,7 @@ public class TestX509 {
 		X500Name owner = new X500Name(dn);
 
 		AlgorithmId algo = new AlgorithmId(AlgorithmId.sha1WithRSAEncryption_oid);
+		//AlgorithmId algo = AlgorithmId.get("SHA256withRSA"); // byName
 		info.set(X509CertInfo.VALIDITY, interval);
 		info.set(X509CertInfo.SERIAL_NUMBER, new CertificateSerialNumber(sn));
 		info.set(X509CertInfo.SUBJECT, new CertificateSubjectName(owner));
@@ -72,6 +73,8 @@ public class TestX509 {
 		// Sign the X.509
 		X509CertImpl cert = new X509CertImpl(info);
 		cert.sign(privkey, algo.getName());
+		System.out.println(new AlgorithmId(AlgorithmId.sha1WithRSAEncryption_oid).getName());
+		System.out.println(AlgorithmId.get("SHA1withRSA").getName());
 		return cert;
 	}
 
