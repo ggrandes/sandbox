@@ -11,11 +11,31 @@ import java.util.List;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
 
 public class TestSSLClientSocket {
+
+	public static SSLParameters setupSSLParams(SSLContext ctx) {
+		List<String> protos = Arrays.asList(new String[] { 
+				"TLSv1", 
+				"SSLv3" 
+		});
+		List<String> suites = Arrays.asList(new String[] {
+				"TLS_RSA_WITH_AES_256_CBC_SHA",
+				"TLS_RSA_WITH_AES_128_CBC_SHA",
+				"SSL_RSA_WITH_3DES_EDE_CBC_SHA",
+				"SSL_RSA_WITH_RC4_128_SHA"
+		});
+		SSLParameters sslParams = ctx.getSupportedSSLParameters();
+		protos.retainAll(Arrays.asList(sslParams.getProtocols()));
+		suites.retainAll(Arrays.asList(sslParams.getCipherSuites()));
+		sslParams.setProtocols(protos.toArray(new String[0]));
+		sslParams.setCipherSuites(suites.toArray(new String[0]));
+		return sslParams;
+	}
 
 	public static void main(String[] args) throws Exception {
 		char[] pwd = "changeit".toCharArray();
@@ -38,28 +58,18 @@ public class TestSSLClientSocket {
 		ctx.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
 		SSLSocketFactory factory = ctx.getSocketFactory();
 		//
-		SSLSocket sock = (SSLSocket) factory.createSocket();
-		// Setup
-		List<String> protos = Arrays.asList(new String[] { 
-				"TLSv1", 
-				"SSLv3" 
-		});
-		List<String> suites = Arrays.asList(new String[] {
-				"TLS_RSA_WITH_AES_256_CBC_SHA",
-				"TLS_RSA_WITH_AES_128_CBC_SHA",
-				"SSL_RSA_WITH_3DES_EDE_CBC_SHA",
-				"SSL_RSA_WITH_RC4_128_SHA"
-		});
-		protos.retainAll(Arrays.asList(sock.getEnabledProtocols()));
-		suites.retainAll(Arrays.asList(sock.getEnabledCipherSuites()));
+		// Setup SSL Parameters
+		SSLParameters sslParams = setupSSLParams(ctx);
 		//
-		sock.setEnableSessionCreation(true);
-		sock.setEnabledProtocols(protos.toArray(new String[0]));
-		sock.setEnabledCipherSuites(suites.toArray(new String[0]));
-		// Display
-		System.out.println("Suites: " + suites);
-		System.out.println("Protos: " + protos);
-		// Start
+		// Create Socket
+		SSLSocket sock = (SSLSocket) factory.createSocket();
+		sock.setEnabledCipherSuites(sslParams.getCipherSuites());
+		sock.setEnabledProtocols(sslParams.getProtocols());
+		// Display Settings
+		System.out.println("Protos: " + Arrays.asList(sock.getEnabledProtocols()));
+		System.out.println("Suites: " + Arrays.asList(sock.getEnabledCipherSuites()));
+		//
+		// Connect
 		sock.connect(new InetSocketAddress("127.0.0.1", 1991), 30000);
 		sock.startHandshake();
 		System.out.println("Connect: " + sock);

@@ -12,6 +12,7 @@ import java.util.List;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
@@ -26,9 +27,25 @@ import javax.net.ssl.TrustManagerFactory;
  */
 public class TestSSLServerSocket {
 
-	/**
-	 * @param args
-	 */
+	public static SSLParameters setupSSLParams(SSLContext ctx) {
+		List<String> protos = Arrays.asList(new String[] { 
+				"TLSv1", 
+				"SSLv3" 
+		});
+		List<String> suites = Arrays.asList(new String[] {
+				"TLS_RSA_WITH_AES_256_CBC_SHA",
+				"TLS_RSA_WITH_AES_128_CBC_SHA",
+				"SSL_RSA_WITH_3DES_EDE_CBC_SHA",
+				"SSL_RSA_WITH_RC4_128_SHA"
+		});
+		SSLParameters sslParams = ctx.getSupportedSSLParameters();
+		protos.retainAll(Arrays.asList(sslParams.getProtocols()));
+		suites.retainAll(Arrays.asList(sslParams.getCipherSuites()));
+		sslParams.setProtocols(protos.toArray(new String[0]));
+		sslParams.setCipherSuites(suites.toArray(new String[0]));
+		return sslParams;
+	}
+
 	public static void main(String[] args) throws Exception {
 		char[] pwd = "changeit".toCharArray();
 		// Generate RSA Key
@@ -52,27 +69,17 @@ public class TestSSLServerSocket {
 		ctx.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
 		SSLServerSocketFactory factory = ctx.getServerSocketFactory();
 		//
-		SSLServerSocket listen = (SSLServerSocket) factory.createServerSocket(1991);
-		// Setup
-		List<String> protos = Arrays.asList(new String[] { 
-				"TLSv1", 
-				"SSLv3" 
-		});
-		List<String> suites = Arrays.asList(new String[] {
-				"TLS_RSA_WITH_AES_256_CBC_SHA",
-				"TLS_RSA_WITH_AES_128_CBC_SHA",
-				"SSL_RSA_WITH_3DES_EDE_CBC_SHA",
-				"SSL_RSA_WITH_RC4_128_SHA"
-		});
-		protos.retainAll(Arrays.asList(listen.getEnabledProtocols()));
-		suites.retainAll(Arrays.asList(listen.getEnabledCipherSuites()));
+		// Setup SSL Parameters
+		SSLParameters sslParams = setupSSLParams(ctx);
 		//
-		listen.setEnableSessionCreation(true);
-		listen.setEnabledProtocols(protos.toArray(new String[0]));
-		listen.setEnabledCipherSuites(suites.toArray(new String[0]));
-		// Display
-		System.out.println("Suites: " + suites);
-		System.out.println("Protos: " + protos);
+		// Create Socket
+		SSLServerSocket listen = (SSLServerSocket) factory.createServerSocket(1991);
+		listen.setEnabledCipherSuites(sslParams.getCipherSuites());
+		listen.setEnabledProtocols(sslParams.getProtocols());
+		// Display Settings
+		System.out.println("Protos: " + Arrays.asList(listen.getEnabledProtocols()));
+		System.out.println("Suites: " + Arrays.asList(listen.getEnabledCipherSuites()));
+		//
 		// Start
 		System.out.println("Listen: " + listen);
 		while (true) {
