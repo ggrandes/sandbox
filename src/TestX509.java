@@ -73,8 +73,6 @@ public class TestX509 {
 		// Sign the X.509
 		X509CertImpl cert = new X509CertImpl(info);
 		cert.sign(privkey, algo.getName());
-		System.out.println(new AlgorithmId(AlgorithmId.sha1WithRSAEncryption_oid).getName());
-		System.out.println(AlgorithmId.get("SHA1withRSA").getName());
 		return cert;
 	}
 
