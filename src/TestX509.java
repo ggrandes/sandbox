@@ -68,7 +68,7 @@ public class TestX509 {
 		ekue.add(new ObjectIdentifier(new int[] { 1, 3, 6, 1, 5, 5, 7, 3, 2 })); // Client
 		ext.set(ExtendedKeyUsageExtension.NAME, new ExtendedKeyUsageExtension(Boolean.FALSE, ekue));
 		info.set(X509CertInfo.EXTENSIONS, ext);
-		
+
 		// Sign the X.509
 		X509CertImpl cert = new X509CertImpl(info);
 		cert.sign(privkey, algo.getName());
