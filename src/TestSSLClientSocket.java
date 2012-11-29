@@ -6,6 +6,7 @@ import java.security.KeyStore;
 import java.security.cert.CertificateFactory;
 
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -19,16 +20,14 @@ import javax.net.ssl.TrustManagerFactory;
 public class TestSSLClientSocket {
 	//
 	public static SSLParameters setupSSLParams(SSLContext ctx) {
-		List<String> protos = Arrays.asList(new String[] { 
-				"TLSv1", 
-				"SSLv3" 
-		});
-		List<String> suites = Arrays.asList(new String[] {
-				"TLS_RSA_WITH_AES_256_CBC_SHA",
-				"TLS_RSA_WITH_AES_128_CBC_SHA",
-				"SSL_RSA_WITH_3DES_EDE_CBC_SHA",
-				"SSL_RSA_WITH_RC4_128_SHA"
-		});
+		List<String> protos = new ArrayList<String>();
+		protos.add("TLSv1");
+		protos.add("SSLv3");
+		List<String> suites = new ArrayList<String>();
+		suites.add("TLS_RSA_WITH_AES_256_CBC_SHA");
+		suites.add("TLS_RSA_WITH_AES_128_CBC_SHA");
+		suites.add("SSL_RSA_WITH_3DES_EDE_CBC_SHA");
+		suites.add("SSL_RSA_WITH_RC4_128_SHA");
 		SSLParameters sslParams = ctx.getSupportedSSLParameters();
 		protos.retainAll(Arrays.asList(sslParams.getProtocols()));
 		suites.retainAll(Arrays.asList(sslParams.getCipherSuites()));
