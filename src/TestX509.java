@@ -1,11 +1,16 @@
+import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Date;
 import java.util.Vector;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 
 import javax.xml.bind.DatatypeConverter;
@@ -102,6 +107,34 @@ public class TestX509 {
 		out.write("-----END RSA PRIVATE KEY-----\r\n".getBytes());
 		out.flush();
 		out.close();
+	}
+
+	static PrivateKey loadPriKey(InputStream is) throws Exception {
+		BufferedReader br = new BufferedReader(new InputStreamReader(is));
+		final int CHARS_PER_PAGE = (66*100);
+		StringBuilder builder = new StringBuilder(CHARS_PER_PAGE);
+		boolean inKey = false;
+		for(String line=br.readLine(); line!=null; line=br.readLine()) {
+			if (line.startsWith("-----BEGIN ") && line.endsWith(" PRIVATE KEY-----")) {
+				inKey = true;
+				continue;
+			}
+			if (inKey && line.startsWith("-----END ") && line.endsWith(" PRIVATE KEY-----")) {
+				inKey = false;
+				break;
+			}
+			if (inKey)
+				builder.append(line);
+		}
+		String text = builder.toString();
+		System.out.println(text);
+		//
+		byte[] encoded = DatatypeConverter.parseBase64Binary(text);
+		PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encoded);
+		KeyFactory kf = KeyFactory.getInstance("RSA");
+		PrivateKey key = kf.generatePrivate(keySpec);
+		is.close();
+		return key;
 	}
 
 	public static void main(String[] args) throws Exception {
