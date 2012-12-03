@@ -43,7 +43,9 @@ public class RandomTextGenerator {
 							}
 						}
 					} catch (IOException e) {
-						if (!QUIET) System.out.println(e.toString());
+						if (!QUIET) System.out.println(e.toString() + " " + sock);
+					} catch (Throwable t) {
+						t.printStackTrace();
 					}
 					try { os.close(); } catch(Exception ign) {}
 					try { sock.close(); } catch(Exception ign) {}
