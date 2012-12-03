@@ -34,8 +34,8 @@ public class RandomTextGenerator {
 					try {
 						os = new BufferedOutputStream(sock.getOutputStream(), 80);
 						while (true) {
-							final int n = rand.nextInt();
-							os.write(chars[(n < 0 ? -n : n) % chars.length]);
+							final int n = (rand.nextInt() & 0x7FFFFFFF); // Erase bit sign
+							os.write(chars[n % chars.length]);
 							count++;
 							if ((count % 79) == 0) {
 								os.write(10);
