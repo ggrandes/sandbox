@@ -1,6 +1,5 @@
-# Codigo de ejemplo Java
+# Sandbox: Pruebas de concepto y codigo variado
 
-Pruebas de concepto, sandbox y codigo variado.
 
 ---
 [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
