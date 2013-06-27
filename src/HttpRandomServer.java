@@ -54,6 +54,8 @@ public class HttpRandomServer {
 						out.println("Content-Type: text/plain; charset=US-ASCII");
 						out.println("Connection: close");
 						out.println("Content-Length: " + contentLength);
+						out.println("Cache-Control: private, no-store, no-cache");
+						out.println("Pragma: no-cache");
 						out.println();
 						int lines = 0;
 						while (lines < GEN_LINES) {
