@@ -9,7 +9,7 @@ public class IPv6 {
 	public static final char[] alpha = "0123456789abcdef".toCharArray();
 
 	public static void main(final String[] args) throws Throwable {
-		byte[] addr = Inet6Address.getByName("4321:0000:1:2:3:4:567:89ab").getAddress();
+		byte[] addr = Inet6Address.getByName("4321:0:1:2:3:4:567:89ab").getAddress();
 		StringBuilder sb = new StringBuilder(80);
 		// Forward (expanded)
 		sb.setLength(0);
