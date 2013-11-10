@@ -63,7 +63,11 @@ public class TestStdOutLogger {
 		private final void open() throws IOException {
 			final String newStamp = getTimeStamp();
 			if (newStamp != currentStamp) {
-				close();
+				if (newStamp.equals(currentStamp)) {
+					currentStamp = newStamp;
+				} else {
+					close();
+				}
 			}
 			if (os == null) {
 				final String out = filename + "." + newStamp;
