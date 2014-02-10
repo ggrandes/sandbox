@@ -6,7 +6,7 @@ import java.text.ParseException;
  * @link <a href="http://technobcn.wordpress.com/2013/09/30/java-expression-eval-system-property/">Java:
  *       Expression Eval (System Property)</a>
  */
-public class MapExpression {
+public class MapExpressionSimple {
 	public final String expression;
 	private String mapped;
 
@@ -16,7 +16,7 @@ public class MapExpression {
 	 * @param expression
 	 *            to map
 	 */
-	public MapExpression(final String expression) throws InvalidExpression {
+	public MapExpressionSimple(final String expression) throws InvalidExpression {
 		this.expression = expression;
 		this.mapped = eval(expression);
 	}
@@ -26,7 +26,7 @@ public class MapExpression {
 	 * 
 	 * @throws InvalidExpression
 	 */
-	public MapExpression reEval() throws InvalidExpression {
+	public MapExpressionSimple reEval() throws InvalidExpression {
 		mapped = eval(expression);
 		return this;
 	}
@@ -114,8 +114,8 @@ public class MapExpression {
 	 */
 	public static void main(final String[] args) throws Throwable {
 		System.setProperty("user.state", "lucky");
-		MapExpression m;
-		m = new MapExpression("Hi ${user.name}, you are ${user.state}!!");
+		MapExpressionSimple m;
+		m = new MapExpressionSimple("Hi ${user.name}, you are ${user.state}!!");
 		System.out.println(m.get());
 	}
 }
