@@ -18,6 +18,7 @@
  * 
  * var p = new jpasswd();
  * 
+ * p.setAlpha('23456789ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz/-.');
  * p.generate(10); // result => cfn34.AZUX
  * 
  * p.checkStrong('Te.Vh/a3'); // result => true
