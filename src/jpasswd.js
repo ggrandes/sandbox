@@ -25,7 +25,7 @@
 function jpasswd() {
 	'use strict';
 	// Default aphabet, Excluded visual similar chars 01Ol
-	var DEF_ALPHABET = "23456789ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz/-.";
+	var DEF_ALPHABET = ("23456789" + "ABCDEFGHIJKLMNPQRSTUVWXYZ" + "abcdefghijkmnopqrstuvwxyz" + "#$!:.=+-/_");
 	this.alpha = DEF_ALPHABET;
 }
 jpasswd.prototype.setAlpha = function(alpha) {
