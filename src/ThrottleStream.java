@@ -28,13 +28,13 @@ public class ThrottleStream {
 		this.speedLimitBytesSecond = maxSpeedInKilobytesPerSecond * 1024;
 	}
 
-	protected void addAndWait(final int transferred) throws IOException {
+	protected void addAndWait(final int transferredBytes) throws IOException {
 		long now = System.currentTimeMillis() / 1000;
 		if (now != lastTimeStampSeconds) {
 			currentTransferredBytes = 0;
 			lastTimeStampSeconds = now;
 		}
-		currentTransferredBytes += transferred;
+		currentTransferredBytes += transferredBytes;
 		if (currentTransferredBytes >= speedLimitBytesSecond) {
 			try {
 				while (true) {
