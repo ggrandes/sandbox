@@ -99,7 +99,7 @@ public class PlaceholderMemoryInputStream extends InputStream {
 
 	protected String rewrite(final String input, final PlaceholderMapper mapper) throws IOException {
 		try {
-			final MapExpression exp = new MapExpression(input) {
+			final MapExpressionSimple exp = new MapExpressionSimple(input) {
 				@Override
 				String mapToken(final String propName) throws InvalidExpression {
 					final String value = mapper.mapPlaceHolder(propName);
