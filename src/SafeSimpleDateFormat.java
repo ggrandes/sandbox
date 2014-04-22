@@ -48,7 +48,6 @@ public class SafeSimpleDateFormat {
 		private static final ThreadLocal<Map<String, DateFormat>> threadLocalFormatters = new ThreadLocal<Map<String, DateFormat>>() {
 			@Override
 			public HashMap<String, DateFormat> initialValue() {
-				System.out.println("ThreadLocal.initialValue");
 				return new HashMap<String, DateFormat>();
 			}
 		};
