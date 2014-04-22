@@ -3,6 +3,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -45,10 +46,17 @@ public class SafeSimpleDateFormat {
 	}
 
 	public static class ThreadLocalSimpleDateFormat {
+		private static final int MAX_CACHE = 128; // Limit maximum number of cached DateFormats by ThreadLocal
 		private static final ThreadLocal<Map<String, DateFormat>> threadLocalFormatters = new ThreadLocal<Map<String, DateFormat>>() {
 			@Override
 			public HashMap<String, DateFormat> initialValue() {
-				return new HashMap<String, DateFormat>();
+				return new LinkedHashMap<String, DateFormat>() {
+					private static final long serialVersionUID = 42L;
+
+					protected boolean removeEldestEntry(final Map.Entry<String, DateFormat> eldest) {
+						return (size() > MAX_CACHE);
+					}
+				};
 			}
 		};
 
