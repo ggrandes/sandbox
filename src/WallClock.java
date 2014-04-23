@@ -1,10 +1,10 @@
 /**
  * This class implements a WallClock, like System.currentTimeMillis(), with less overhead (but less precise).
  * <p>
- * Sample times over 50.000.000 iterations:
+ * Sample times over 500.000.000 iterations:
  * <ul>
- * <li>SystemClock: 1057ms</li>
- * <li>WallClock: 190ms</li>
+ * <li>SystemClock: 9911ms</li>
+ * <li>WallClock: 1820ms</li>
  * </ul>
  * 
  * @see System#currentTimeMillis()
