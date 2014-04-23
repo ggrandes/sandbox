@@ -135,7 +135,7 @@ public class WallClock implements Runnable {
 				break;
 			}
 		}
-		if (!runningThread) {
+		if (runningThread) {
 			throw new RuntimeException("WallClock Stop FAILED");
 		}
 	}
@@ -146,10 +146,11 @@ public class WallClock implements Runnable {
 	 * @throws Throwable
 	 */
 	public static void main(final String[] args) throws Throwable {
+		final int TOTAL = 50000000;
 		long ax = 0, begin = 0;
 		//
 		begin = System.currentTimeMillis();
-		for (int i = 0; i < 50000000; i++) {
+		for (int i = 0; i < TOTAL; i++) {
 			ax += (System.currentTimeMillis() & 0xFF);
 		}
 		System.out.println("SystemClock: " + (System.currentTimeMillis() - begin) + "ms" + " ax=" + ax);
@@ -159,7 +160,7 @@ public class WallClock implements Runnable {
 		//
 		WallClock wc = WallClock.getInstance();
 		begin = System.currentTimeMillis();
-		for (int i = 0; i < 50000000; i++) {
+		for (int i = 0; i < TOTAL; i++) {
 			ax += (wc.currentTimeMillis() & 0xFF);
 		}
 		System.out.println("WallClock: " + (System.currentTimeMillis() - begin) + "ms" + " ax=" + ax);
