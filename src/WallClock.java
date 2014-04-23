@@ -147,27 +147,27 @@ public class WallClock implements Runnable {
 	 */
 	public static void main(final String[] args) throws Throwable {
 		final int TOTAL = 500000000;
-		long ax = 0, begin = 0;
+		long ax = 0, ts = 0;
 		//
-		begin = System.currentTimeMillis();
+		ts = System.currentTimeMillis();
 		for (int i = 0; i < TOTAL; i++) {
 			ax += (System.currentTimeMillis() & 0xF);
 		}
-		System.out.println("SystemClock: " + (System.currentTimeMillis() - begin) + "ms");
+		System.out.println("SystemClock: " + (System.currentTimeMillis() - ts) + "ms");
 		System.out.println("SystemClock T1: " + System.currentTimeMillis());
 		Thread.sleep(2);
 		System.out.println("SystemClock T2: " + System.currentTimeMillis());
 		//
 		WallClock wc = WallClock.getInstance();
-		begin = System.currentTimeMillis();
+		ts = System.currentTimeMillis();
 		for (int i = 0; i < TOTAL; i++) {
 			ax += (wc.currentTimeMillis() & 0xF);
 		}
-		System.out.println("WallClock: " + (System.currentTimeMillis() - begin) + "ms");
+		System.out.println("WallClock: " + (System.currentTimeMillis() - ts) + "ms");
 		System.out.println("WallClock T1: " + wc.currentTimeMillis());
 		Thread.sleep(2);
 		System.out.println("WallClock T2: " + wc.currentTimeMillis());
-		if (ax > 0)
+	    if ((ax > 0) || (ts > 0)) // Dummy (always true)
 			wc.destroy();
 	}
 }
