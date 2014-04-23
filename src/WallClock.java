@@ -151,9 +151,9 @@ public class WallClock implements Runnable {
 		//
 		begin = System.currentTimeMillis();
 		for (int i = 0; i < TOTAL; i++) {
-			ax += (System.currentTimeMillis() & 0xFF);
+			ax += (System.currentTimeMillis() & 0xF);
 		}
-		System.out.println("SystemClock: " + (System.currentTimeMillis() - begin) + "ms" + " ax=" + ax);
+		System.out.println("SystemClock: " + (System.currentTimeMillis() - begin) + "ms");
 		System.out.println("SystemClock T1: " + System.currentTimeMillis());
 		Thread.sleep(2);
 		System.out.println("SystemClock T2: " + System.currentTimeMillis());
@@ -161,12 +161,13 @@ public class WallClock implements Runnable {
 		WallClock wc = WallClock.getInstance();
 		begin = System.currentTimeMillis();
 		for (int i = 0; i < TOTAL; i++) {
-			ax += (wc.currentTimeMillis() & 0xFF);
+			ax += (wc.currentTimeMillis() & 0xF);
 		}
-		System.out.println("WallClock: " + (System.currentTimeMillis() - begin) + "ms" + " ax=" + ax);
+		System.out.println("WallClock: " + (System.currentTimeMillis() - begin) + "ms");
 		System.out.println("WallClock T1: " + wc.currentTimeMillis());
 		Thread.sleep(2);
 		System.out.println("WallClock T2: " + wc.currentTimeMillis());
-		wc.destroy();
+		if (ax > 0)
+			wc.destroy();
 	}
 }
