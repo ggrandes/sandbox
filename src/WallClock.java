@@ -146,7 +146,7 @@ public class WallClock implements Runnable {
 	 * @throws Throwable
 	 */
 	public static void main(final String[] args) throws Throwable {
-		final int TOTAL = 50000000;
+		final int TOTAL = 500000000;
 		long ax = 0, begin = 0;
 		//
 		begin = System.currentTimeMillis();
