@@ -1,26 +1,62 @@
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Generic Singleton
+ * Generic Singleton with support for WeakReferences
  */
 public class GenericSingleton<T> {
-	private static final GenericSingleton<Object> DEFAULT = new GenericSingleton<Object>();
-	private final HashMap<Object, Object> map = new HashMap<Object, Object>();
+	private static final GenericSingleton<Object> DEFAULT_HARD = createInstance();
+	private static final GenericSingleton<Object> DEFAULT_WEAK = createWeakInstance();
+	private final Map<Object, Object> map;
 
+	/**
+	 * Get Default GenericSingleton instance (HashMap)
+	 * 
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
 	public static <T> GenericSingleton<T> getDefaultInstance() {
-		@SuppressWarnings("unchecked")
-		final GenericSingleton<T> gs = (GenericSingleton<T>) DEFAULT;
-		return gs;
+		return (GenericSingleton<T>) DEFAULT_HARD;
 	}
 
+	/**
+	 * Get Default GenericSingleton instance (WeakHashMap)
+	 * 
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> GenericSingleton<T> getDefaultWeakInstance() {
+		return (GenericSingleton<T>) DEFAULT_WEAK;
+	}
+
+	/**
+	 * Create GenericSingleton instance (hard references)
+	 * 
+	 * @return
+	 */
 	public static <T> GenericSingleton<T> createInstance() {
-		return new GenericSingleton<T>();
+		return new GenericSingleton<T>(false);
 	}
 
-	private GenericSingleton() {
+	/**
+	 * Create GenericSingleton instance (weak references)
+	 * 
+	 * @return
+	 */
+	public static <T> GenericSingleton<T> createWeakInstance() {
+		return new GenericSingleton<T>(true);
+	}
+
+	/**
+	 * Create GenericSingleton
+	 * 
+	 * @param weak true for WeakHashMap or false for HashMap
+	 */
+	private GenericSingleton(final boolean weak) {
+		this.map = (weak ? new WeakHashMap<Object, Object>() : new HashMap<Object, Object>());
 	}
 
 	/**
@@ -164,6 +200,7 @@ public class GenericSingleton<T> {
 		gs = GenericSingleton.getDefaultInstance();
 		gs.get(name, cb).put("user1", "1234");
 		System.out.println(gs.get(name, cb).toString());
+		gs = GenericSingleton.getDefaultInstance();
 		gs.get(name, cb).put("user2", "5678");
 		System.out.println(gs.get(name, cb).toString());
 		//
