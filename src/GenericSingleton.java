@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Generic Singleton with support for WeakReferences
  */
 public class GenericSingleton<T> {
-	private static final GenericSingleton<Object> DEFAULT_HARD = createInstance();
+	private static final GenericSingleton<Object> DEFAULT_STRONG = createInstance();
 	private static final GenericSingleton<Object> DEFAULT_WEAK = createWeakInstance();
 	private final Map<Object, Object> map;
 
@@ -19,7 +19,7 @@ public class GenericSingleton<T> {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> GenericSingleton<T> getDefaultInstance() {
-		return (GenericSingleton<T>) DEFAULT_HARD;
+		return (GenericSingleton<T>) DEFAULT_STRONG;
 	}
 
 	/**
@@ -33,7 +33,7 @@ public class GenericSingleton<T> {
 	}
 
 	/**
-	 * Create GenericSingleton instance (hard references)
+	 * Create GenericSingleton instance (Strong references)
 	 * 
 	 * @return
 	 */
@@ -42,7 +42,7 @@ public class GenericSingleton<T> {
 	}
 
 	/**
-	 * Create GenericSingleton instance (weak references)
+	 * Create GenericSingleton instance (Weak references)
 	 * 
 	 * @return
 	 */
