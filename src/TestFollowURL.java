@@ -30,7 +30,9 @@ public class TestFollowURL {
 	private static final int DEFAULT_MAX_CERTIFICATES = 3;
 
 	public static void main(final String[] args) {
-		for (final String line : checkURL(URL_TEST)) {
+		final String url = (args.length < 1 ? URL_TEST : args[0]);
+		System.out.println("Checking: " + url);
+		for (final String line : checkURL(url)) {
 			System.out.println(line);
 		}
 	}
