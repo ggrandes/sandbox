@@ -36,109 +36,115 @@ public class TestFollowURL {
 	}
 
 	public static List<String> checkURL(final String urlCheck) {
-		HttpURLConnection conn = null;
-		InputStream is = null;
 		ArrayList<String> response = new ArrayList<String>();
 		ArrayList<String> urlList = new ArrayList<String>();
 		urlList.add(urlCheck);
 		//
 		for (int j = 0; j < urlList.size() && j < DEFAULT_MAX_FOLLOW_REDIRECTS; j++) {
 			final String u = urlList.get(j);
-			try {
-				final URL url = new URL(u);
-				conn = (HttpURLConnection) url.openConnection();
-				conn.setInstanceFollowRedirects(DEFAULT_FOLLOW_REDIRECTS);
-				conn.setConnectTimeout(DEFAULT_CONNECT_TIMEOUT);
-				conn.setReadTimeout(DEFAULT_READ_TIMEOUT);
-				conn.setDoOutput(false);
-				conn.setDoInput(true);
-				conn.setRequestProperty("User-Agent", "TestFollowURL");
-				conn.setRequestProperty("Accept", "text/*");
-				conn.setRequestProperty("Connection", "close"); // Disable keepAlive
-				conn.connect();
-				if (conn instanceof HttpsURLConnection) {
-					final HttpsURLConnection sslConn = (HttpsURLConnection) conn;
-					response.add("[CipherSuite: " + String.valueOf(sslConn.getCipherSuite()) + "]");
-					int c = 0;
-					for (final Certificate cert : sslConn.getServerCertificates()) {
-						final String info = getCertificateInfo(cert);
-						if (info != null) {
-							response.add("[CertificateInfo: " + info + "]");
-						}
-						if (++c >= DEFAULT_MAX_CERTIFICATES) {
-							break;
-						}
-					}
-				}
-				// Get the response
-				final Set<Entry<String, List<String>>> resHeaders = conn.getHeaderFields().entrySet();
-				final Iterator<Entry<String, List<String>>> i = resHeaders.iterator();
-				while (i.hasNext()) {
-					final Entry<String, List<String>> e = i.next();
-					final String headerName = e.getKey();
-					if (headerName == null) { // HTTP/1.X YYY ETC
-						response.add(String.valueOf(conn.getHeaderField(0)));
-						continue;
-					}
-					for (final String headerValue : e.getValue()) {
-						response.add(headerName + ": " + headerValue);
-					}
-				}
-				response.add("");
-				// Follow Redirect
-				final String location = conn.getHeaderField("Location");
-				if (location != null) {
-					urlList.add(location);
-					continue;
-				}
-				// Content-Length or Transfer-Encoding indicate body in request
-				final int responseBodyLength = conn.getContentLength();
-				final boolean transferEncoding = (conn.getHeaderField("Transfer-Encoding") != null);
-				final boolean doInput = ((responseBodyLength > 0) || transferEncoding);
-				//
-				if (doInput) {
-					try {
-						is = conn.getInputStream();
-					} catch (Exception e) {
-						is = conn.getErrorStream();
-					}
-					if (is != null) {
-						final String contentType = conn.getHeaderField("Content-Type");
-						if (!String.valueOf(contentType).startsWith("text/")) {
-							response.add("[...cut...]");
-							continue;
-						}
-						final BufferedReader in = new BufferedReader(new InputStreamReader(is));
-						try {
-							String line = null;
-							int c = 0;
-							while ((line = in.readLine()) != null) {
-								if (line.length() > DEFAULT_MAX_LINE_LENGTH) {
-									line = line.substring(0, DEFAULT_MAX_LINE_LENGTH);
-									response.add(line + "[...cut...]");
-								} else {
-									response.add(line);
-								}
-								if (++c >= DEFAULT_MAX_BODY_LINES) {
-									response.add("[...cut...]");
-									break;
-								}
-							}
-						} finally {
-							closeQuietly(in);
-						}
-					}
-				}
-			} catch (Exception e) {
-				response.add(String.valueOf(e));
-				for (final StackTraceElement t : e.getStackTrace()) {
-					response.add("\tat " + String.valueOf(t));
-				}
-			} finally {
-				closeQuietly(is);
-			}
+			final String location = checkURL(u, response);
+			if (location != null)
+				urlList.add(location);
 		}
 		return response;
+	}
+
+	public static String checkURL(final String urlCheck, final List<String> response) {
+		HttpURLConnection conn = null;
+		InputStream is = null;
+		try {
+			final URL url = new URL(urlCheck);
+			conn = (HttpURLConnection) url.openConnection();
+			conn.setInstanceFollowRedirects(DEFAULT_FOLLOW_REDIRECTS);
+			conn.setConnectTimeout(DEFAULT_CONNECT_TIMEOUT);
+			conn.setReadTimeout(DEFAULT_READ_TIMEOUT);
+			conn.setDoOutput(false);
+			conn.setDoInput(true);
+			conn.setRequestProperty("User-Agent", "TestFollowURL");
+			conn.setRequestProperty("Accept", "text/*");
+			conn.setRequestProperty("Connection", "close"); // Disable keepAlive
+			conn.connect();
+			if (conn instanceof HttpsURLConnection) {
+				final HttpsURLConnection sslConn = (HttpsURLConnection) conn;
+				response.add("[CipherSuite: " + String.valueOf(sslConn.getCipherSuite()) + "]");
+				int c = 0;
+				for (final Certificate cert : sslConn.getServerCertificates()) {
+					final String info = getCertificateInfo(cert);
+					if (info != null) {
+						response.add("[CertificateInfo: " + info + "]");
+					}
+					if (++c >= DEFAULT_MAX_CERTIFICATES) {
+						break;
+					}
+				}
+			}
+			// Get the response
+			final Set<Entry<String, List<String>>> resHeaders = conn.getHeaderFields().entrySet();
+			final Iterator<Entry<String, List<String>>> i = resHeaders.iterator();
+			while (i.hasNext()) {
+				final Entry<String, List<String>> e = i.next();
+				final String headerName = e.getKey();
+				if (headerName == null) { // HTTP/1.X YYY ETC
+					response.add(String.valueOf(conn.getHeaderField(0)));
+					continue;
+				}
+				for (final String headerValue : e.getValue()) {
+					response.add(headerName + ": " + headerValue);
+				}
+			}
+			response.add("");
+			// Follow Redirect
+			final String location = conn.getHeaderField("Location");
+			if (location != null) {
+				return location;
+			}
+			// Content-Length or Transfer-Encoding indicate body in request
+			final int responseBodyLength = conn.getContentLength();
+			final boolean transferEncoding = (conn.getHeaderField("Transfer-Encoding") != null);
+			final boolean doInput = ((responseBodyLength > 0) || transferEncoding);
+			//
+			if (doInput) {
+				try {
+					is = conn.getInputStream();
+				} catch (Exception e) {
+					is = conn.getErrorStream();
+				}
+				if (is != null) {
+					final String contentType = conn.getHeaderField("Content-Type");
+					if (!String.valueOf(contentType).startsWith("text/")) {
+						response.add("[...cut...]");
+						return null;
+					}
+					final BufferedReader in = new BufferedReader(new InputStreamReader(is));
+					try {
+						String line = null;
+						int c = 0;
+						while ((line = in.readLine()) != null) {
+							if (line.length() > DEFAULT_MAX_LINE_LENGTH) {
+								line = line.substring(0, DEFAULT_MAX_LINE_LENGTH);
+								response.add(line + "[...cut...]");
+							} else {
+								response.add(line);
+							}
+							if (++c >= DEFAULT_MAX_BODY_LINES) {
+								response.add("[...cut...]");
+								break;
+							}
+						}
+					} finally {
+						closeQuietly(in);
+					}
+				}
+			}
+		} catch (Exception e) {
+			response.add(String.valueOf(e));
+			for (final StackTraceElement t : e.getStackTrace()) {
+				response.add("\tat " + String.valueOf(t));
+			}
+		} finally {
+			closeQuietly(is);
+		}
+		return null;
 	}
 
 	private static String getCertificateInfo(final Certificate cert) {
