@@ -114,7 +114,8 @@ public class TestFollowURL {
 							int c = 0;
 							while ((line = in.readLine()) != null) {
 								if (line.length() > DEFAULT_MAX_LINE_LENGTH) {
-									response.add(line.substring(0, DEFAULT_MAX_LINE_LENGTH) + "[...cut...]");
+									line = line.substring(0, DEFAULT_MAX_LINE_LENGTH);
+									response.add(line + "[...cut...]");
 								} else {
 									response.add(line);
 								}
