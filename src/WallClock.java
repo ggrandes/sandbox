@@ -1,22 +1,24 @@
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
+
 /**
  * This class implements a WallClock, like System.currentTimeMillis(), with less overhead (but less precise).
+ * This version implements a lightweight auto-shutdown of wallclock-thread using a WeakReference.
  * <p>
  * Sample times over 500.000.000 iterations:
  * <ul>
- * <li>SystemClock: 9911ms</li>
- * <li>WallClock: 1820ms</li>
+ * <li>SystemClock: 9476ms</li>
+ * <li>WallClock: 768ms</li>
  * </ul>
  * 
  * @see System#currentTimeMillis()
  */
-public class WallClock implements Runnable {
-	private volatile int clockLatency = 1;           // WallClock time refresh (millis)
+public class WallClock {
+	private static volatile int clockLatency = 1;    // WallClock time refresh (millis)
 	private volatile long lastTimeMillis = 0L;       // Last time cached from SystemClock
-	private volatile boolean runningThread = false;  // Thread running?
-	private volatile Thread clocker = null;          // WallClock Thread
 
 	// Singleton
-	private static WallClock self = null;
+	private static WeakReference<WallClock> self = null;
 
 	private WallClock() {
 	}
@@ -27,20 +29,25 @@ public class WallClock implements Runnable {
 	 * @return
 	 */
 	public static synchronized WallClock getInstance() {
-		if (self == null) {
-			self = new WallClock();
-			self.start();
+		WallClock wc = (self == null ? null : self.get());
+		if (wc == null) {
+			if (self != null)
+				self.enqueue();
+			wc = new WallClock();
+			final ReferenceQueue<WallClock> q = new ReferenceQueue<WallClock>();
+			self = new WeakReference<WallClock>(wc, q);
+			wc.start(q);
 		}
-		return self;
+		return wc;
 	}
 
 	/**
 	 * Set new wall clock refresh time (millis)
 	 * 
-	 * @param clockLatency
+	 * @param newClockLatency
 	 */
-	public void setClockLatency(final int clockLatency) {
-		this.clockLatency = clockLatency;
+	public void setClockLatency(final int newClockLatency) {
+		clockLatency = newClockLatency;
 	}
 
 	/**
@@ -49,10 +56,7 @@ public class WallClock implements Runnable {
 	 * @return
 	 */
 	public long currentTimeMillis() {
-		if (runningThread && (lastTimeMillis > 0)) {
-			return lastTimeMillis;
-		}
-		throw new IllegalStateException("WallClock not started");
+		return lastTimeMillis;
 	}
 
 	/**
@@ -70,73 +74,47 @@ public class WallClock implements Runnable {
 	}
 
 	/**
-	 * Run, baby, run
+	 * Start a new wallclock
 	 */
-	public void run() {
-		try {
-			lastTimeMillis = System.currentTimeMillis();
-			runningThread = true;
-			synchronized (clocker) {
-				clocker.notifyAll();
-			}
-			while (!Thread.currentThread().isInterrupted()) {
-				lastTimeMillis = System.currentTimeMillis();
-				Thread.sleep(clockLatency);
-			}
-		} catch (InterruptedException ie) {
-			/* Allow thread to exit */
-		} finally {
-			runningThread = false;
-			clocker = null;
-			lastTimeMillis = 0;
-		}
-	}
-
-	/**
-	 * Start wallclock if not already started
-	 */
-	private void start() {
-		if ((clocker == null) || (!clocker.isAlive())) {
-			clocker = new Thread(this);
-			clocker.setDaemon(true);
-			clocker.setName("WallClock-" + System.currentTimeMillis());
-			try {
-				synchronized (clocker) {
-					clocker.start();
-					final int waitCount = (3000 / clockLatency); // Wait 3 seconds
-					for (int i = 0; i < waitCount; i++) {
-						clocker.wait(clockLatency);
-						if (runningThread)
-							break;
-					}
-				}
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-			}
-		}
+	private void start(final ReferenceQueue<WallClock> q) {
+		final Thread clocker = new Thread(new ClockRunner(q));
+		clocker.setDaemon(true);
+		clocker.setName("WallClock-" + currentTimeMillis(true));
+		clocker.start();
 	}
 
 	/**
 	 * Destroy WallClock
 	 */
 	public void destroy() {
-		if ((!runningThread) || (clocker == null)) {
-			throw new IllegalStateException("WallClock already stoped");
+		self.enqueue();
+	}
+
+	private final int updateAndGetLatency() {
+		lastTimeMillis = System.currentTimeMillis();
+		return clockLatency;
+	}
+
+	private static final class ClockRunner implements Runnable {
+		final ReferenceQueue<WallClock> q;
+
+		public ClockRunner(final ReferenceQueue<WallClock> q) {
+			this.q = q;
 		}
-		clocker.interrupt();
-		final int waitCount = (3000 / clockLatency); // Wait 3 seconds
-		for (int i = 0; i < waitCount; i++) {
+
+		@Override
+		public void run() {
+			System.out.println("Thread started: " + Thread.currentThread().getName());
 			try {
-				Thread.sleep(clockLatency);
+				while ((q.remove(getInstance().updateAndGetLatency()) == null)
+						&& !Thread.currentThread().isInterrupted()) {
+					// System.out.println("Thread wait: " + System.currentTimeMillis());
+				}
 			} catch (InterruptedException ie) {
-				Thread.currentThread().interrupt();
+				/* Allow thread to exit */
+			} finally {
+				System.out.println("Thread ended: " + Thread.currentThread().getName());
 			}
-			if (!runningThread) {
-				break;
-			}
-		}
-		if (runningThread) {
-			throw new RuntimeException("WallClock Stop FAILED");
 		}
 	}
 
@@ -167,7 +145,7 @@ public class WallClock implements Runnable {
 		System.out.println("WallClock T1: " + wc.currentTimeMillis());
 		Thread.sleep(2);
 		System.out.println("WallClock T2: " + wc.currentTimeMillis());
-	    if ((ax > 0) || (ts > 0)) // Dummy (always true)
+		if ((ax > 0) || (ts > 0)) // Dummy (always true)
 			wc.destroy();
 	}
 }
